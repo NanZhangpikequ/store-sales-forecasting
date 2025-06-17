@@ -1,1 +1,1 @@
-
+Just run the merge.py, and the merged files will be saved in the /data/output folder.
