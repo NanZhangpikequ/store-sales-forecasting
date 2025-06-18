@@ -4,12 +4,11 @@ import pandas as pd
 train = pd.read_csv('data/train.csv')
 test = pd.read_csv('data/test.csv')
 oil = pd.read_csv('data/oil.csv')
-transactions = pd.read_csv('data/transactions.csv')
 stores = pd.read_csv('data/stores.csv')
 holidays = pd.read_csv('data/holidays_events.csv')
 
 # === Step 2: 日期转换为 datetime 格式 ===
-for df in [train, test, oil, transactions, holidays]:
+for df in [train, test, oil, holidays]:
     df['date'] = pd.to_datetime(df['date'])
 
 # === Step 3: 处理缺失值 ===
@@ -23,9 +22,6 @@ if 'onpromotion' in test.columns:
 # === Step 4: 合并表格 ===
 train = train.merge(oil, on='date', how='left')
 test = test.merge(oil, on='date', how='left')
-
-train = train.merge(transactions, on=['date', 'store_nbr'], how='left')
-test = test.merge(transactions, on=['date', 'store_nbr'], how='left')
 
 train = train.merge(stores, on='store_nbr', how='left')
 test = test.merge(stores, on='store_nbr', how='left')
