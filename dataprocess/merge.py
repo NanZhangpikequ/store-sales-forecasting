@@ -12,22 +12,11 @@ for df in [train, test, oil, holidays]:
     df['date'] = pd.to_datetime(df['date'])
 
 # === Step 3: 处理缺失值 ===
-mean_price = oil['dcoilwtico'].mean()  # 或用中位数 median()
-
 # 补全完整日期范围（从最小日期到最大日期）
 full_dates = pd.DataFrame({'date': pd.date_range(oil['date'].min(), oil['date'].max())})
 oil_full = full_dates.merge(oil, on='date', how='left')
-
-# 方案一：使用线性插值（向前+向后），处理中间和边缘的 NaN
-# oil_full['dcoilwtico'] = oil_full['dcoilwtico'].interpolate(method='linear', limit_direction='both')
-
-# 方案二：使用将先向前向后填充，再用均值补齐剩余空值
-# mean_price = oil['dcoilwtico'].mean()  # 或用中位数 median()
-# oil_full['dcoilwtico'] = oil_full['dcoilwtico'].ffill().bfill().fillna(mean_price)
-
-# 方案其他：？
-
-
+# 前向填充（周末节假日按前一天算）, 2013-1-1后向填充
+oil_full['dcoilwtico'] = oil_full['dcoilwtico'].ffill().bfill()
 oil = oil_full.copy()
 
 if 'onpromotion' in train.columns:
