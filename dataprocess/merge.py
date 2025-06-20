@@ -1,4 +1,5 @@
 import pandas as pd
+import os
 
 # === Step 1: Load CSV files ===
 train = pd.read_csv('data/train.csv')
@@ -82,6 +83,9 @@ train['sample_weight'] = train.apply(assign_sample_weight, axis=1)
 test['sample_weight'] = test.apply(assign_sample_weight, axis=1)
 
 # === Step 9: Save final output ===
+os.makedirs('data/output', exist_ok=True)
+train = train.drop(columns=['type', 'sample_weight'], errors='ignore')
+test = test.drop(columns=['type', 'sample_weight'], errors='ignore')
 train.to_csv('data/output/train_merged_final.csv', index=False)
 test.to_csv('data/output/test_merged_final.csv', index=False)
 
