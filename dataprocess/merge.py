@@ -79,6 +79,7 @@ def assign_sample_weight(row):
         return 1.0
 
 train['sample_weight'] = train.apply(assign_sample_weight, axis=1)
+test['sample_weight'] = test.apply(assign_sample_weight, axis=1)
 
 # === Step 9: Save final output ===
 train.to_csv('data/output/train_merged_final.csv', index=False)
