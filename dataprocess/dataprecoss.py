@@ -1,62 +1,49 @@
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import Pipeline
-from sklearn.impute import SimpleImputer
+import os
 
-# === Step 1: Load Data ===
-df = pd.read_csv("your_file.csv", parse_dates=["date"])
+script_dir = os.path.dirname(os.path.abspath(__file__))
+data_path = os.path.join(script_dir, "..", "data", "output")
+output_path = os.path.join(script_dir, "..", "data", "output")
+os.makedirs(output_path, exist_ok=True)
 
-# === Step 2: Extract Time Features ===
-df['month'] = df['date'].dt.month
-df['day_of_week'] = df['date'].dt.dayofweek
-df['day_of_month'] = df['date'].dt.day
-df['week_of_year'] = df['date'].dt.isocalendar().week.astype(int)
+files_to_process = ['test_merged_final.csv', 'train_merged_final.csv']
 
-# === Step 3: Transform Target (log) ===
-df['sales_log'] = np.log1p(df['sales'])
-
-# === Step 4: Define Feature Groups ===
-numerical_features = ['cluster', 'dcoilwtico', 'sample_weight', 'onpromotion',
-                      'month', 'day_of_week', 'day_of_month', 'week_of_year']
-categorical_features = ['state', 'type']
-embedding_features = ['store_nbr', 'family', 'city']
-direct_features = ['is_working_day', 'quake_severe', 'quake_moderate', 'payday']
-
-# === Step 5: Define Transformers ===
-numerical_transformer = Pipeline(steps=[
-    ("imputer", SimpleImputer(strategy="mean")),
-    ("scaler", StandardScaler())
-])
-
-categorical_transformer = Pipeline(steps=[
-    ("imputer", SimpleImputer(strategy="most_frequent")),
-    ("onehot", OneHotEncoder(handle_unknown="ignore"))
-])
-
-# === Step 6: Combine in ColumnTransformer ===
-preprocessor = ColumnTransformer(
-    transformers=[
-        ("num", numerical_transformer, numerical_features),
-        ("cat", categorical_transformer, categorical_features)
-    ],
-    remainder="passthrough"  # keep embedding and direct features
-)
-
-# === Step 7: Apply Transformation ===
-processed_array = preprocessor.fit_transform(df)
-
-# Get column names after one-hot
-encoded_cat_columns = preprocessor.named_transformers_['cat']['onehot'].get_feature_names_out(categorical_features)
-column_names = numerical_features + list(encoded_cat_columns) + embedding_features + direct_features
-
-# === Step 8: To DataFrame ===
-processed_df = pd.DataFrame(processed_array, columns=column_names)
-processed_df['sales_log'] = df['sales_log'].values
-processed_df['date'] = df['date']
-processed_df['store_nbr'] = df['store_nbr']
-processed_df['family'] = df['family']
-
-# === Step 9: Save to CSV or Continue to Sequence Build ===
-processed_df.to_csv("processed_lstm_data.csv", index=False)
+for filename in files_to_process:
+    file_path = os.path.join(data_path, filename)
+    
+    # Check file exists
+    if not os.path.exists(file_path):
+        print(f"Skip: {filename}")
+        continue
+    
+    print(f"Processing: {filename}")
+    
+    # Load file
+    df = pd.read_csv(file_path)
+    
+    # exchange to datetime type
+    df['date'] = pd.to_datetime(df['date'])
+    
+    # date feature
+    df['year'] = df['date'].dt.year
+    df['month'] = df['date'].dt.month
+    df['day'] = df['date'].dt.day
+    df['dayofweek'] = df['date'].dt.dayofweek  # 0=Monday, 6=Sunday
+    df['quarter'] = df['date'].dt.quarter
+    
+    # sin/cos encoder
+    # month (1-12)
+    df['month_sin'] = np.sin(2 * np.pi * df['month'] / 12)
+    df['month_cos'] = np.cos(2 * np.pi * df['month'] / 12)
+    
+    # day of week(0-6)
+    df['dayofweek_sin'] = np.sin(2 * np.pi * df['dayofweek'] / 7)
+    df['dayofweek_cos'] = np.cos(2 * np.pi * df['dayofweek'] / 7)
+    
+    # save data
+    output_filename = filename.replace('.csv', '_with_features.csv')
+    output_file_path = os.path.join(output_path, output_filename)
+    df.to_csv(output_file_path, index=False)
+    
+    print(f"Done: {output_filename}")
