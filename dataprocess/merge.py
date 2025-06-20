@@ -1,7 +1,4 @@
 import pandas as pd
-import os
-import matplotlib.pyplot as plt
-import seaborn as sns
 
 # === Step 1: Load CSV files ===
 train = pd.read_csv('train.csv')
@@ -56,7 +53,11 @@ def add_is_working_day(df):
 train = add_is_working_day(train)
 test = add_is_working_day(test)
 
-# === Step 6: Earthquake zone logic ===
+# === Step 6: Payday feature ===
+train['payday'] = train['date'].apply(lambda d: int(d.day == 15 or d.is_month_end))
+test['payday'] = test['date'].apply(lambda d: int(d.day == 15 or d.is_month_end))
+
+# === Step 7: Earthquake zone logic ===
 def mark_quake_severity(date, state):
     if pd.Timestamp("2016-04-16") <= date <= pd.Timestamp("2016-05-15"):
         if state in ["Manabí", "Esmeraldas"]:
@@ -67,10 +68,6 @@ def mark_quake_severity(date, state):
 
 train['quake_severe'], train['quake_moderate'] = zip(*train.apply(lambda r: mark_quake_severity(r['date'], r['state']), axis=1))
 test['quake_severe'], test['quake_moderate'] = zip(*test.apply(lambda r: mark_quake_severity(r['date'], r['state']), axis=1))
-
-# === Step 7: Payday feature ===
-train['payday'] = train['date'].apply(lambda d: int(d.day == 15 or d.is_month_end))
-test['payday'] = test['date'].apply(lambda d: int(d.day == 15 or d.is_month_end))
 
 # === Step 8: Sample weight based on earthquake severity ===
 def assign_sample_weight(row):
@@ -83,21 +80,7 @@ def assign_sample_weight(row):
 
 train['sample_weight'] = train.apply(assign_sample_weight, axis=1)
 
-# === Step 9: Visualization of earthquake impact ===
-os.makedirs('data/output', exist_ok=True)
-
-plt.figure(figsize=(10, 6))
-sns.boxplot(data=train[train['quake_severe'] == 1], x='quake_severe', y='sales', color='red', width=0.3, fliersize=1, boxprops=dict(alpha=.5), label="Severe")
-sns.boxplot(data=train[train['quake_moderate'] == 1], x='quake_moderate', y='sales', color='orange', width=0.3, fliersize=1, boxprops=dict(alpha=.5), label="Moderate")
-plt.title("Sales Distribution under Earthquake Impact")
-plt.xticks([0, 1], ["Moderate", "Severe"])
-plt.ylabel("Sales")
-plt.xlabel("Earthquake Region")
-plt.tight_layout()
-plt.savefig('data/output/earthquake_sales_boxplot.png', dpi=300)
-plt.close()
-
-# === Step 10: Save final output ===
+# === Step 9: Save final output ===
 train.to_csv('data/output/train_merged_final.csv', index=False)
 test.to_csv('data/output/test_merged_final.csv', index=False)
 
