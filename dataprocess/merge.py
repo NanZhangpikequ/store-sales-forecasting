@@ -1,11 +1,11 @@
 import pandas as pd
 
 # === Step 1: Load CSV files ===
-train = pd.read_csv('train.csv')
-test = pd.read_csv('test.csv')
-oil = pd.read_csv('oil.csv')
-stores = pd.read_csv('stores.csv')
-holidays = pd.read_csv('holidays_events.csv')
+train = pd.read_csv('data/train.csv')
+test = pd.read_csv('data/test.csv')
+oil = pd.read_csv('data/oil.csv')
+stores = pd.read_csv('data/stores.csv')
+holidays = pd.read_csv('data/holidays_events.csv')
 
 # === Step 2: Convert date columns to datetime ===
 for df in [train, test, oil, holidays]:
