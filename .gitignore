@@ -194,3 +194,9 @@ cython_debug/
 .cursorindexingignore
 
 *.csv
+/.idea/.gitignore
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/inspectionProfiles/profiles_settings.xml
+/.idea/store-sales-forecasting.iml
+/.idea/vcs.xml

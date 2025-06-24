@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -7,8 +8,12 @@ from tensorflow.keras.layers import Input, LSTM, Dense, Embedding, Concatenate
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.model_selection import train_test_split
 
+# === 获取当前脚本路径，构造数据文件绝对路径 ===
+script_dir = os.path.dirname(os.path.abspath(__file__))
+data_path = os.path.join(script_dir, '..', 'data', 'output', 'train_merged_final_with_features.csv')
+
 # === Load data ===
-df = pd.read_csv("train_merged_final_with_features.csv")
+df = pd.read_csv(data_path)
 df['sales_log'] = np.log1p(df['sales'])
 df['date'] = pd.to_datetime(df['date'])
 df = df.sort_values(['store_nbr', 'family', 'date'])

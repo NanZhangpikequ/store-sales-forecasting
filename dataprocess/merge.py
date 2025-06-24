@@ -1,12 +1,18 @@
 import pandas as pd
 import os
 
+# === Step 0: Setup absolute paths ===
+script_dir = os.path.dirname(os.path.abspath(__file__))
+data_dir = os.path.join(script_dir, '..', 'data')
+output_dir = os.path.join(data_dir, 'output')
+os.makedirs(output_dir, exist_ok=True)
+
 # === Step 1: Load CSV files ===
-train = pd.read_csv('data/train.csv')
-test = pd.read_csv('data/test.csv')
-oil = pd.read_csv('data/oil.csv')
-stores = pd.read_csv('data/stores.csv')
-holidays = pd.read_csv('data/holidays_events.csv')
+train = pd.read_csv(os.path.join(data_dir, 'train.csv'))
+test = pd.read_csv(os.path.join(data_dir, 'test.csv'))
+oil = pd.read_csv(os.path.join(data_dir, 'oil.csv'))
+stores = pd.read_csv(os.path.join(data_dir, 'stores.csv'))
+holidays = pd.read_csv(os.path.join(data_dir, 'holidays_events.csv'))
 
 # === Step 2: Convert date columns to datetime ===
 for df in [train, test, oil, holidays]:
@@ -67,8 +73,10 @@ def mark_quake_severity(date, state):
             return 0, 1
     return 0, 0
 
-train['quake_severe'], train['quake_moderate'] = zip(*train.apply(lambda r: mark_quake_severity(r['date'], r['state']), axis=1))
-test['quake_severe'], test['quake_moderate'] = zip(*test.apply(lambda r: mark_quake_severity(r['date'], r['state']), axis=1))
+train['quake_severe'], train['quake_moderate'] = zip(*train.apply(
+    lambda r: mark_quake_severity(r['date'], r['state']), axis=1))
+test['quake_severe'], test['quake_moderate'] = zip(*test.apply(
+    lambda r: mark_quake_severity(r['date'], r['state']), axis=1))
 
 # === Step 8: Sample weight based on earthquake severity ===
 def assign_sample_weight(row):
@@ -83,10 +91,9 @@ train['sample_weight'] = train.apply(assign_sample_weight, axis=1)
 test['sample_weight'] = test.apply(assign_sample_weight, axis=1)
 
 # === Step 9: Save final output ===
-os.makedirs('data/output', exist_ok=True)
 train = train.drop(columns=['type', 'sample_weight'], errors='ignore')
 test = test.drop(columns=['type', 'sample_weight'], errors='ignore')
-train.to_csv('data/output/train_merged_final.csv', index=False)
-test.to_csv('data/output/test_merged_final.csv', index=False)
+train.to_csv(os.path.join(output_dir, 'train_merged_final.csv'), index=False)
+test.to_csv(os.path.join(output_dir, 'test_merged_final.csv'), index=False)
 
-print("✅ All data merged, features created, and earthquake visualization saved (no emoji).")
+print("✅ All data merged, features created, and files saved.")
