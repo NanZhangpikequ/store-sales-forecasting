@@ -1,10 +1,9 @@
 import pandas as pd
 import os
 
-# === Step 0: Setup absolute paths ===
-script_dir = os.path.dirname(os.path.abspath(__file__))
-data_dir = os.path.join(script_dir, '..', 'data')
-output_dir = os.path.join(data_dir, 'output')
+# === Step 0: Setup paths ===
+data_dir = '/kaggle/input/store-sales-time-series-forecasting'
+output_dir = '/kaggle/working/output'
 os.makedirs(output_dir, exist_ok=True)
 
 # === Step 1: Load CSV files ===
@@ -96,4 +95,4 @@ test = test.drop(columns=['type', 'sample_weight'], errors='ignore')
 train.to_csv(os.path.join(output_dir, 'train_merged_final.csv'), index=False)
 test.to_csv(os.path.join(output_dir, 'test_merged_final.csv'), index=False)
 
-print("✅ All data merged, features created, and files saved.")
+print("All data merged, features created, and files saved.")
