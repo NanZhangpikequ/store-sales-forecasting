@@ -3,9 +3,8 @@ import numpy as np
 import os
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 
-script_dir = os.path.dirname(os.path.abspath(__file__))
-data_path = os.path.join(script_dir, "..", "data", "output")
-output_path = os.path.join(script_dir, "..", "data", "output")
+data_path = '/kaggle/working/output'
+output_path = '/kaggle/working/output'
 os.makedirs(output_path, exist_ok=True)
 
 files_to_process = ['train_merged_final.csv','test_merged_final.csv']
